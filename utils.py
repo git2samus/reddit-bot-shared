@@ -1,5 +1,6 @@
 import logging
 import http.client as http_client
+from unidecode import unidecode
 
 
 def setup_http_debugging():
@@ -15,3 +16,7 @@ def setup_http_debugging():
     requests_log = logging.getLogger("requests.packages.urllib3")
     requests_log.setLevel(logging.DEBUG)
     requests_log.propagate = True
+
+
+def normalize_str(raw):
+    return unidecode(raw).lower()
