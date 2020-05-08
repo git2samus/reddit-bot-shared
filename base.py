@@ -12,8 +12,17 @@ class APIProcess(object):
     base36_pattern = '[0-9a-z]+'
 
     def __init__(self, source_version):
+        # reuse requests session for PRAW and external requests (feeds, etc.)
+        self.http_session = requests.Session()
+
         # PRAW reads the env variable 'praw_site' automatically
-        self.reddit = praw.Reddit(config_interpolation="basic")
+        self.reddit = praw.Reddit(
+            config_interpolation='basic',
+            requestor_kwargs={'session': self.http_session}
+        )
+
+        # make sure we use the same user-agent on all requests
+        self.http_session.headers.update({'user-agent': self.reddit.config.user_agent})
 
         # check db connectivity and setup tables
         self.db = psycopg2.connect(os.getenv('DATABASE_URL'))
@@ -73,10 +82,6 @@ class XMLProcess(APIProcess):
     def __init__(self, source_version, subreddit, path, kind_class):
         # create PRAW instance and db connection
         super().__init__(source_version)
-
-        # create requests session to retrieve feeds
-        self.http_session = requests.Session()
-        self.http_session.headers.update({'user-agent': self.reddit.config.user_agent})
 
         # feed global params
         self.subreddit, self.path, self.kind_class = subreddit, path, kind_class
