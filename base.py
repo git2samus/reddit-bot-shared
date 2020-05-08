@@ -5,19 +5,15 @@ import xml.etree.ElementTree as ET
 from sys import exit
 from datetime import datetime, timezone, timedelta
 from time import sleep
-from configparser import ConfigParser
 from contextlib import closing
-from unittest.mock import patch
 
 
 class APIProcess(object):
     base36_pattern = '[0-9a-z]+'
 
-    # https://github.com/praw-dev/praw/pull/1290
-    @patch('praw.config.configparser.RawConfigParser', new=ConfigParser)
     def __init__(self, source_version):
         # PRAW reads the env variable 'praw_site' automatically
-        self.reddit = praw.Reddit()
+        self.reddit = praw.Reddit(config_interpolation="basic")
 
         # check db connectivity and setup tables
         self.db = psycopg2.connect(os.getenv('DATABASE_URL'))
